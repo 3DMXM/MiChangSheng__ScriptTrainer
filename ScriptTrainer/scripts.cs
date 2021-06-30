@@ -35,7 +35,7 @@ public class Script : MonoBehaviour
         {
             Debug.Log("未进入游戏");
         }
-        
+
 
     }
 
@@ -128,4 +128,3 @@ public class Script : MonoBehaviour
     //}
 
 }
-

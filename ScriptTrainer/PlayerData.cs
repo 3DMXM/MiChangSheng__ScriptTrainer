@@ -37,4 +37,3 @@ public class PlayerData: MonoBehaviour
     public int _dunSu { get; set; }
 
 }
-
