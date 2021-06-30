@@ -29,31 +29,12 @@ public class Script : MonoBehaviour
             data._dunSu = player._dunSu;
 
             ScriptTrainer.ScriptTrainer.playerData = data;
-            //ScriptTrainer.ScriptTrainer.newPlayerData = data;
         }
         catch (Exception)
         {
             Debug.Log("未进入游戏");
         }
-        
 
-    }
-
-    /// <summary>
-    /// 修改数据保存到游戏
-    /// </summary>
-    public static void ChangeToGame()
-    {
-        //KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家      
-
-        //var oldData = ScriptTrainer.ScriptTrainer.playerData;
-        //var newData = ScriptTrainer.ScriptTrainer.newPlayerData;
-
-        //if (oldData.age != newData.age)
-        //{
-        //    player.age = (uint)newData.age;
-        //    Debug.Log(String.Format("修改年龄为{0}岁", newData.age));
-        //}
 
     }
     /// <summary>
@@ -101,31 +82,11 @@ public class Script : MonoBehaviour
         player.chenghaomag.AddFengLu(change - fengLu);
     }
 
+    public static void ChangeLingGan(int change)
+    {
+        KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
+        player.AddLingGan(change - player.LingGan);
+    }
 
-
-    //var key = new BepInEx.Configuration.KeyboardShortcut(KeyCode.F9);
-    //if (key.IsDown())
-    //{
-    //    var a = new ADDBUFF();
-    //    KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                        
-    //    var skillList = jsonData.instance.skillJsonData;        // 获取技能列表
-    //    foreach (var item in skillList)
-    //    {
-    //        var id = item.Key;
-    //        var skill = item.Value;
-    //    }
-    //    var ItemList = jsonData.instance.ItemJsonData;          // 物品列表
-    //    var BuffList = jsonData.instance.BuffJsonData;          // Buff列表
-    //    foreach (var item in ItemList)
-    //    {
-    //        if (jsonData.instance.ItemJsonData.HasField(item.Key))
-    //        {
-    //            int id = Tools.instance.getSkillIDByKey(int.Parse(item.Key));
-    //            player.addItem(id, 1, Tools.CreateItemSeid(id));            // 给玩家添加物品
-    //        }
-    //    }
-    //player.money += 100;    // 给玩家+100块钱
-    //}
-
+   
 }
-

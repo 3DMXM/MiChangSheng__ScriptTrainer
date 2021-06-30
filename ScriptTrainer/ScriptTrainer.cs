@@ -21,7 +21,6 @@ namespace ScriptTrainer
         private string searchItem = "";
 
         private Rect HeaderTitleRect;
-        private Rect HeaderTableRect;
         private Rect windowRect;
         private Rect AddItemTableRect;
         private Rect AddlocktechRect;
@@ -74,7 +73,7 @@ namespace ScriptTrainer
         {
 
             // 主窗口居中
-            int num = Mathf.Min(Screen.width, 700);
+            int num = Mathf.Min(Screen.width, 740);
             int num2 = (Screen.height < 400) ? Screen.height : (400);
             int num3 = Mathf.RoundToInt((float)(Screen.width - num) / 2f);
             int num4 = Mathf.RoundToInt((float)(Screen.height - num2) / 2f);
@@ -84,10 +83,9 @@ namespace ScriptTrainer
 
             // 头部
             this.HeaderTitleRect = new Rect(5, 5, (float)num - 40, (float)num2 - 40);
-            // 选项卡按钮
-            this.HeaderTableRect = new Rect(0, 40, 700, 40);
+
             // 玩家资料修改
-            this.UserDataTableRect = new Rect(0, 40, 700, 300);
+            this.UserDataTableRect = new Rect(0, 40, (float)num - 30, 300);
 
             
         }
@@ -112,7 +110,9 @@ namespace ScriptTrainer
                     //alignment = TextAnchor.UpperCenter,  //对齐方式
                 };
                 // 定义一个新窗口
-                windowRect = GUI.Window(20210219, windowRect, DoMyWindow, "", myWindowStyle);
+                windowRect = GUI.Window(20210630, windowRect, DoMyWindow, "", myWindowStyle);
+
+                window.RightWindow(new Rect(windowRect.x - 300, windowRect.y, 300, windowRect.height), "门派列表");
             }
         }
 
@@ -120,7 +120,6 @@ namespace ScriptTrainer
         // 显示窗口
         void DoMyWindow(int winId)
         {
-            //Rect Gr = new Rect();
             GUILayout.BeginHorizontal();
             {
                 Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
@@ -149,10 +148,7 @@ namespace ScriptTrainer
             }
             GUILayout.EndHorizontal();
 
-
-
             GUI.DragWindow();
-
         }
 
 
@@ -256,9 +252,7 @@ namespace ScriptTrainer
                         }
 
                     }
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    MyGui.hr(); // 换行
                     {
                         {
                             GUILayout.Label("心境", Labelguistyle);
@@ -273,30 +267,54 @@ namespace ScriptTrainer
                         {
                             GUILayout.Label("灵感", Labelguistyle);
                             var ItemText = GUILayout.TextField(player.LingGan.ToString(), TextFieldguistyle);
-                            player.LingGan = Script.CheckIsInt(ItemText);
+                            //player.LingGan = Script.CheckIsInt(ItemText);
+                            Script.ChangeLingGan(Script.CheckIsInt(ItemText));
                         }
                         
                     }
                     GUILayout.EndHorizontal();
 
+
+                    MyGui.Title("门派宗门");
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
                         {
                             GUILayout.Label("门派", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.menPai.ToString(), TextFieldguistyle);
-                            player.menPai = (ushort)Script.CheckIsInt(ItemText);
+
+                            string menPaiName = Tools.Code64(jsonData.instance.ShiLiHaoGanDuName[player.menPai.ToString()]["ChinaText"].str);
+
+                            if (MyGui.Button(menPaiName))
+                            {
+                                window.MenPaiWindowStat = !window.MenPaiWindowStat;
+                            }
                         }
                         {
-                            GUILayout.Label("门派声望", Labelguistyle);
+                            GUILayout.Label("职位", Labelguistyle);
+
+                            if (MyGui.Button(PlayerEx.GetMenPaiChengHao()))
+                            {
+                                window.ShiLiChengHaoStat = !window.ShiLiChengHaoStat;
+                            }
+
+                            //if (window.ShiLiChengHaoStat)
+                            //{
+                            //    window.ShiLiChengHao();
+                            //}
+                        }
+                    }
+                    MyGui.hr(); // 换行
+                    {
+                        {
+                            GUILayout.Label("声望", Labelguistyle);
                             var ItemText = GUILayout.TextField(PlayerEx.GetMenPaiShengWang().ToString(), TextFieldguistyle);
                             Script.ChangeMenPaiShengWang(Script.CheckIsInt(ItemText));
                         }
-                        {
-                            GUILayout.Label("俸禄", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.chenghaomag.GetAllFengLuMoney().ToString(), TextFieldguistyle);
-                            //Script.ChangeMenPaiShengWang(Script.CheckIsInt(ItemText));
-                            Script.ChangeFengLuMoney(Script.CheckIsInt(ItemText));
-                        }
+                    }
+                    GUILayout.EndHorizontal();
+
+                    //MyGui.Title("灵根属性");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
 
                     }
                     GUILayout.EndHorizontal();
