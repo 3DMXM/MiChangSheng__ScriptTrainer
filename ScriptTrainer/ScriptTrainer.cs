@@ -1,37 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
+using GUIPackage;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace ScriptTrainer
 {
     [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.0.0.0")]
     public class ScriptTrainer : BaseUnityPlugin
     {
-        public static PlayerData playerData = new PlayerData(); // 玩家属性
-        //public static PlayerData newPlayerData = new PlayerData(); // 新玩家属性
+        //public static PlayerData playerData = new PlayerData(); // 玩家属性
+        public static KBEngine.Avatar player;   //获取玩家
+        public static List<item> itemList = new List<item>();  // 物品列表
 
         // 窗口相关
-        public bool DisplayingWindow;
-        private bool ShowAddItemWindow = true;
-        private bool ShowOtherWindow = false;
-        private bool ShowAddlocktechWindow = false;
-        private int AddItemNum = 1000;
-
-        private string searchItem = "";
+        public static bool DisplayingWindow;
 
         private Rect HeaderTitleRect;
         private Rect windowRect;
-        private Rect AddItemTableRect;
-        private Rect AddlocktechRect;
-        private Rect OtherRect;
         private Vector2 scrollPosition;
 
         private Rect DisplayArea;
-        private Rect UserDataTableRect;
+        private Rect TableRect;
 
         // 启动按键
         private ConfigEntry<BepInEx.Configuration.KeyboardShortcut> ShowCounter { get; set; }
+
+        // 一些要用的参数
+        private int ItemID = 0; // 物品ID
+        private int count = 1;  // 物品数量
+        private string search = ""; // 搜索
 
         // 在插件启动时会直接调用Awake()方法
         void Awake()
@@ -39,33 +39,32 @@ namespace ScriptTrainer
             // 允许用户自定义启动快捷键
             ShowCounter = Config.Bind("修改器快捷键", "Key", new BepInEx.Configuration.KeyboardShortcut(KeyCode.F9));
 
+            // 清空之前的日志
+            Debug.EmptyLog();
             // 日志输出
-            Debug.Log("脚本已启动");
+            Debug.addLog("脚本已启动");
 
+            // 获取游戏数据
+            Script.GetGameData();
             // 计算区域
             ComputeRect();
-
         }
 
         void Update()
         {
             if (ShowCounter.Value.IsDown())
             {
-                //Debug.Log("按下按键");
                 DisplayingWindow = !DisplayingWindow;
                 if (DisplayingWindow)
                 {
-                    Debug.Log("打开窗口");
+                    Debug.addLog("打开窗口");
                 }
                 else
                 {
-                    Debug.Log("关闭窗口");
+                    Debug.addLog("关闭窗口");
                 }
-                Script.GetPlyaerData();
             }
 
-            // 保存修改
-            //Script.ChangeToGame();
         }
 
         // 初始样式
@@ -84,8 +83,8 @@ namespace ScriptTrainer
             // 头部
             this.HeaderTitleRect = new Rect(5, 5, (float)num - 40, (float)num2 - 40);
 
-            // 玩家资料修改
-            this.UserDataTableRect = new Rect(0, 40, (float)num - 30, 300);
+            // 中间窗口
+            this.TableRect = new Rect(0, 40, (float)num - 30, 300);
 
             
         }
@@ -93,8 +92,10 @@ namespace ScriptTrainer
         // GUI函数
         private void OnGUI()
         {
-            if (this.DisplayingWindow)
+            if (DisplayingWindow)
             {
+                player = Tools.instance.getPlayer();    // 获取玩家
+
                 Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
                 // rgba(116, 125, 140,1.0)
                 texture2D.SetPixel(0, 0, new Color32(51, 51, 51, 255));
@@ -110,9 +111,13 @@ namespace ScriptTrainer
                     //alignment = TextAnchor.UpperCenter,  //对齐方式
                 };
                 // 定义一个新窗口
-                windowRect = GUI.Window(20210630, windowRect, DoMyWindow, "", myWindowStyle);
+                int winId = 20210630;
+                windowRect = GUI.Window(winId, windowRect, DoMyWindow, "", myWindowStyle);
 
-                window.RightWindow(new Rect(windowRect.x - 300, windowRect.y, 300, windowRect.height), "门派列表");
+                float windowW = 210f;
+                window.LeftWindow(new Rect(windowRect.x - windowW, windowRect.y, windowW, windowRect.height));      // 左侧菜单
+                window.RightWindow(new Rect(windowRect.x + windowRect.width, windowRect.y + 40, windowW, windowRect.height));   // 右侧菜单
+                window.CloseButton(new Rect(windowRect.x + windowRect.width, windowRect.y, 80,40)); // 关闭按钮
             }
         }
 
@@ -140,8 +145,17 @@ namespace ScriptTrainer
                     // 渲染头部标题
                     this.HeaderTitle(HeaderTitleRect);
 
+                    // 基础功能
+                    if (window.TabButtonStaty.GetWindowStat<windowsStat>("BasicScripts")) this.BasicScriptsTable(TableRect);
+
                     // 玩家资料
-                    this.UserDataTable(UserDataTableRect);
+                    if (window.TabButtonStaty.GetWindowStat<windowsStat>("PlayerAttributes")) this.UserDataTable(TableRect);
+
+                    // 玩家悟道
+                    if (window.TabButtonStaty.GetWindowStat<windowsStat>("PlayerWuDao")) this.UserWuDaoTable(TableRect);
+
+                    // 玩家物品
+                    if (window.TabButtonStaty.GetWindowStat<windowsStat>("playerItem")) this.UserItemTable(TableRect);
 
                 }
                 GUILayout.EndArea();
@@ -184,138 +198,353 @@ namespace ScriptTrainer
             GUILayout.EndHorizontal();
         }
 
-        // 修改玩家资料
-        void UserDataTable(Rect UserDataTableRect)
+        // 基础功能
+        void BasicScriptsTable(Rect TableRect)
         {
-            GUIStyle Labelguistyle = new GUIStyle()
+            GUILayout.BeginArea(TableRect);
             {
-                fixedWidth = 50,
-                fixedHeight = 40,
-                alignment = TextAnchor.MiddleRight,
-                normal = new GUIStyleState
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
                 {
-                    textColor = Color.white
+                    // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                  
+
+                    XmGUI.Title("常用功能");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
+                        {
+                            // 现金
+                            XmGUI.Label("现金");
+                            if (XmGUI.Button("-1000", 50, 20))
+                            {
+                                player.money -= 1000;
+                            }
+                            var ItemText = XmGUI.TextField(player.money.ToString());
+                            player.money = (ulong)Script.CheckIsInt(ItemText);
+                            if (XmGUI.Button("+1000", 50, 20))
+                            {
+                                player.money += 1000;
+                            }
+                        }
+                        {
+                            // 宁州声望
+                            XmGUI.Label("宁州声望", 70, 40);
+                            if (XmGUI.Button("-100", 50, 20))
+                            {
+                                PlayerEx.AddNingZhouShengWang(-100);
+                            }
+                            XmGUI.Label(PlayerEx.GetNingZhouShengWang().ToString(), 30, 40);
+                            if (XmGUI.Button("+100", 50, 20))
+                            {
+                                PlayerEx.AddNingZhouShengWang(100);
+                            }
+                        }
+                        {
+                            // 海域声望
+                            XmGUI.Label("海域声望", 70, 40);
+                            if (XmGUI.Button("-100", 50, 20))
+                            {
+                                PlayerEx.AddSeaShengWang(-100);
+                            }
+                            XmGUI.Label(PlayerEx.GetSeaShengWang().ToString(), 30, 40);
+                            if (XmGUI.Button("+100", 50, 20))
+                            {
+                                PlayerEx.AddSeaShengWang(100);
+                            }
+                        }
+                    }
+                    XmGUI.hr();
+                    {
+                        if (XmGUI.Button("修为全满"))
+                        {
+                            player.exp = (ulong)jsonData.instance.LevelUpDataJsonData[player.level.ToString()]["MaxExp"].I;
+                        }
+                        if (XmGUI.Button("血量全满"))
+                        {
+                            player.HP = player.HP_Max;
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+
+                    XmGUI.Title("抽卡");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
+                        if (XmGUI.Button("随机1张卡", 90, 40))
+                        {
+                            RoundManager.instance.drawCard(player);
+                        }
+                        if (XmGUI.Button("随机3张卡", 90, 40))
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                RoundManager.instance.drawCard(player);
+                            }
+                        }
+                        if (XmGUI.Button("随机3张相同卡", 90, 40))
+                        {
+
+                            int a = Random.Range(0, 4);
+                            for (int i = 0; i < 3; i++)
+                            {
+                                RoundManager.instance.drawCard(player, a);
+                            }
+                        }                        
+                    }
+                    XmGUI.hr();
+                    {
+                        string[] CardList = { "金", "木", "水", "火", "土" };
+                        int CardID = 0;
+                        foreach (var item in CardList)
+                        {
+                            if (XmGUI.Button(String.Format("抽3张{0}卡", item), 90, 40))
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    RoundManager.instance.drawCard(player, CardID);
+                                }
+                            }
+                            CardID++;
+                        }
+                    }
+                    GUILayout.EndHorizontal();
                 }
-            };
-            GUIStyle TextFieldguistyle = new GUIStyle()
+                GUILayout.EndScrollView();
+
+            }
+            GUILayout.EndArea();
+        }
+
+        // 修改玩家资料
+        void UserDataTable(Rect TableRect)
+        {
+            GUILayout.BeginArea(TableRect);
             {
-                fixedWidth = 60,
-                fixedHeight = 40,
-                alignment = TextAnchor.MiddleLeft,
-                margin = new RectOffset(5, 0, 0, 0),
-                normal = new GUIStyleState
-                {
-                    textColor = Color.white
-                }
-            };
-
-            GUILayout.BeginArea(UserDataTableRect);
-            {
-
-
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
                 {
 
-                    KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 基础属性
-                    MyGui.Title("玩家基础属性");
+                    // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
+                    XmGUI.Title("玩家");
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
                         {
-                            GUILayout.Label("年龄", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.age.ToString(), TextFieldguistyle);
+                            XmGUI.Label("年龄");
+                            var ItemText = XmGUI.TextField(player.age.ToString());
                             player.age = (uint)Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("寿元", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.shouYuan.ToString(), TextFieldguistyle);
+                            XmGUI.Label("寿元");
+                            var ItemText = XmGUI.TextField(player.shouYuan.ToString());
                             player.shouYuan = (uint)Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("资质", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.ZiZhi.ToString(), TextFieldguistyle);
+                            XmGUI.Label("资质");
+                            var ItemText = XmGUI.TextField(player.ZiZhi.ToString());
                             player.ZiZhi = Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("神识", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.shengShi.ToString(), TextFieldguistyle);
+                            XmGUI.Label("神识");
+                            var ItemText = XmGUI.TextField(player.shengShi.ToString());
                             player.shengShi = Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("悟性", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.wuXin.ToString(), TextFieldguistyle);
+                            XmGUI.Label("悟性");
+                            var ItemText = XmGUI.TextField(player.wuXin.ToString());
                             player.wuXin = (uint)Script.CheckIsInt(ItemText);
                         } 
                         {
-                            GUILayout.Label("遁速", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.dunSu.ToString(), TextFieldguistyle);
+                            XmGUI.Label("遁速");
+                            var ItemText = XmGUI.TextField(player.dunSu.ToString());
                             player.dunSu = Script.CheckIsInt(ItemText);
-                        }
+                        }                       
 
                     }
-                    MyGui.hr(); // 换行
+                    XmGUI.hr(); // 换行
                     {
                         {
-                            GUILayout.Label("心境", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.xinjin.ToString(), TextFieldguistyle);
+                            XmGUI.Label("心境");
+                            var ItemText = XmGUI.TextField(player.xinjin.ToString());
                             player.xinjin = Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("丹毒", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.Dandu.ToString(), TextFieldguistyle);
+                            XmGUI.Label("丹毒");
+                            var ItemText = XmGUI.TextField(player.Dandu.ToString());
                             player.Dandu = Script.CheckIsInt(ItemText);
                         }
                         {
-                            GUILayout.Label("灵感", Labelguistyle);
-                            var ItemText = GUILayout.TextField(player.LingGan.ToString(), TextFieldguistyle);
+                            XmGUI.Label("灵感");
+                            var ItemText = XmGUI.TextField(player.LingGan.ToString());
                             //player.LingGan = Script.CheckIsInt(ItemText);
                             Script.ChangeLingGan(Script.CheckIsInt(ItemText));
+                        }                       
+                        {
+                            XmGUI.Label("修为");
+                            var ItemText = XmGUI.TextField(player.exp.ToString());
+                            player.exp = (ulong)Script.CheckIsInt(ItemText);
                         }
-                        
+                        {
+                            XmGUI.Label("生命");
+                            window.PlayerHP();
+                        }
                     }
                     GUILayout.EndHorizontal();
 
 
-                    MyGui.Title("门派宗门");
+                    XmGUI.Title("门派宗门");
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
                         {
-                            GUILayout.Label("门派", Labelguistyle);
-
+                            XmGUI.Label("门派");
                             string menPaiName = Tools.Code64(jsonData.instance.ShiLiHaoGanDuName[player.menPai.ToString()]["ChinaText"].str);
-
-                            if (MyGui.Button(menPaiName))
+                            if (XmGUI.Button(menPaiName))
                             {
-                                window.MenPaiWindowStat = !window.MenPaiWindowStat;
+                                window.windowStaty.ChangeWindowStat<windowsStat>("MenPaiWindowStat", !window.windowStaty.GetWindowStat<windowsStat>("MenPaiWindowStat"));
                             }
                         }
                         {
-                            GUILayout.Label("职位", Labelguistyle);
+                            XmGUI.Label("职位");
 
-                            if (MyGui.Button(PlayerEx.GetMenPaiChengHao()))
+                            if (XmGUI.Button(PlayerEx.GetMenPaiChengHao()))
                             {
-                                window.ShiLiChengHaoStat = !window.ShiLiChengHaoStat;
+                                window.windowStaty.ChangeWindowStat<windowsStat>("ShiLiChengHaoStat", !window.windowStaty.GetWindowStat<windowsStat>("ShiLiChengHaoStat"));
                             }
-
-                            //if (window.ShiLiChengHaoStat)
-                            //{
-                            //    window.ShiLiChengHao();
-                            //}
                         }
-                    }
-                    MyGui.hr(); // 换行
-                    {
                         {
-                            GUILayout.Label("声望", Labelguistyle);
-                            var ItemText = GUILayout.TextField(PlayerEx.GetMenPaiShengWang().ToString(), TextFieldguistyle);
+                            XmGUI.Label("声望");
+                            var ItemText = XmGUI.TextField(PlayerEx.GetMenPaiShengWang().ToString());
                             Script.ChangeMenPaiShengWang(Script.CheckIsInt(ItemText));
                         }
+                        //{
+                        //    MyGui.Label("俸禄");
+                        //    var ItemText = MyGui.TextField(player.chenghaomag.GetAllFengLuMoney().ToString());
+                        //}
                     }
                     GUILayout.EndHorizontal();
 
-                    //MyGui.Title("灵根属性");
+
+                    XmGUI.Title("灵根属性");
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
+                        string[] LingGengList = {"金","木","水","火","土" };
+                        for (int i = 0; i < player.LingGeng.Count; i++)
+                        {
+                            XmGUI.Label(LingGengList[i]);
+                            var ItemText = XmGUI.TextField(player.LingGeng[i].ToString());
+                            player.LingGeng[i] = Script.CheckIsInt(ItemText);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.EndScrollView();
+            }
+            GUILayout.EndArea();
+        }
 
+        // 玩家悟道修改
+        void UserWuDaoTable(Rect TableRect)
+        {
+            GUILayout.BeginArea(TableRect);
+            {
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
+                {
+                    // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                    
+
+                    XmGUI.Title("悟道属性");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
+                        {
+                            int num = 0;
+                            foreach (var item in jsonData.instance.WuDaoAllTypeJson.list)
+                            {
+                                XmGUI.Label(Tools.Code64(item["name"].str));
+                                var ItemText = XmGUI.TextField(player.wuDaoMag.getWuDaoEx(item["id"].I).ToString());
+                                player.wuDaoMag.SetWuDaoEx(item["id"].I, Script.CheckIsInt(ItemText));
+
+                                num++;
+                                if (num >= 6)
+                                {
+                                    XmGUI.hr();
+                                    num = 0;
+                                }
+                            }
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+
+
+                    XmGUI.Title("悟道修改");                    
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
+                        {
+                            XmGUI.Label("悟道点");
+                            var ItemText = XmGUI.TextField(player._WuDaoDian.ToString());
+                            player._WuDaoDian = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            if (XmGUI.Button("一键全满"))
+                            {
+                                foreach (var item in jsonData.instance.WuDaoAllTypeJson.list)
+                                {
+                                    player.wuDaoMag.SetWuDaoEx(item["id"].I, 150000);
+                                }
+                            }
+                        }
+                        XmGUI.hr(); // 换行
+                        {
+                            int num = 0;
+                            foreach (var item in jsonData.instance.WuDaoAllTypeJson.list)
+                            {
+                                string str = String.Format("{0} 全满", Tools.Code64(item["name"].str));
+                                if (XmGUI.Button(str))
+                                {
+                                    player.wuDaoMag.SetWuDaoEx(item["id"].I, 150000);
+                                }
+                                num++;
+                                if (num >= 6)
+                                {
+                                    XmGUI.hr();
+                                    num = 0;
+                                }
+                            }
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.EndScrollView();
+            }
+            GUILayout.EndArea();
+
+        }
+
+        // 玩家物品修改
+        void UserItemTable(Rect TableRect)
+        {
+            GUILayout.BeginArea(TableRect);
+            {
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
+                {
+                    // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                  
+
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {
+                        XmGUI.Label("获取物品", 80, 40);
+                        XmGUI.Label("ID", 30, 40);
+                        //int ItemID = 0;
+                        ItemID = Script.CheckIsInt(XmGUI.TextField(ItemID.ToString(), 40, 40));
+                        XmGUI.Label("数量", 30, 40);
+                        //int count = 1;
+                        count = Script.CheckIsInt(XmGUI.TextField(count.ToString(), 40, 40));
+                        if (XmGUI.Button("获取", 50, 20))
+                        {
+                            if (ItemID != 0)
+                            {
+                                player.addItem(ItemID, Tools.CreateItemSeid(ItemID), count);
+                                Singleton.inventory.AddItem(ItemID);
+                            }
+                        }
+                        //XmGUI.Label("搜索");
+                        //search = XmGUI.TextField(search);
+                    }
+                    XmGUI.hr();
+                    {
+                        //window.ItemWindow(itemList, player, count, search);
                     }
                     GUILayout.EndHorizontal();
                 }

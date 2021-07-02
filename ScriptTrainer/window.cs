@@ -1,24 +1,38 @@
-﻿using System;
+﻿using GUIPackage;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class window : MonoBehaviour
 {
-    public static bool MenPaiWindowStat = false;
-    public static bool ShiLiChengHaoStat = false;
+    //public static bool MenPaiWindowStat = false;
+    //public static bool ShiLiChengHaoStat = false;
+    public delegate void WindowContent();
+
+    public static List<windowsStat> windowStaty = new List<windowsStat>
+    {
+        new windowsStat(){ Key = "MenPaiWindowStat",Value =  false },
+        new windowsStat(){ Key = "ShiLiChengHaoStat",Value = false }
+    };
+
+    public static List<windowsStat> TabButtonStaty = new List<windowsStat>
+    {
+        new windowsStat(){Key = "BasicScripts", Value = true , Text = "基础功能"},
+        new windowsStat(){Key = "PlayerAttributes", Value = false , Text = "玩家属性"},
+        new windowsStat(){Key = "PlayerWuDao", Value = false , Text = "悟道"},
+        new windowsStat(){Key = "playerItem", Value = false, Text = "物品"}
+    };
+
 
     /// <summary>
-    /// 显示右侧窗口
+    /// 显示左侧窗口
     /// </summary>
     /// <param name="position">坐标</param>
     /// <param name="content">窗体内容</param>
     /// <param name="title">窗体标题</param>
-    public static void RightWindow(Rect position, string title, WindowContent content)
+    public static void LeftWindow(Rect position)
     {
-        if (MenPaiWindowStat || ShiLiChengHaoStat)
+        if (windowStaty.GetWindowStat<windowsStat>())
         {
             GUILayout.BeginHorizontal();
             {
@@ -37,8 +51,10 @@ public class window : MonoBehaviour
                 };
                 GUILayout.BeginArea(position, guistyle);
                 {
-                    if (MenPaiWindowStat) MenPaiWindow(new Rect(15, 15, position.width - 30, position.height - 30), content);
-                    if (ShiLiChengHaoStat) ShiLiChengHao();
+                    if (windowStaty.GetWindowStat<windowsStat>("MenPaiWindowStat")) ShowContent(new Rect(15, 15, position.width - 30, position.height - 30), MenPaiWindow);
+                    if (windowStaty.GetWindowStat<windowsStat>("ShiLiChengHaoStat")) ShowContent(new Rect(15, 15, position.width - 30, position.height - 30), ShiLiChengHao);
+
+                    //ShowContent(new Rect(15, 15, position.width - 30, position.height - 30), content);
 
                 }
                 GUILayout.EndArea();
@@ -46,10 +62,14 @@ public class window : MonoBehaviour
             GUILayout.EndHorizontal();
         }       
     }
-
+    /// <summary>
+    /// 显示内容
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="content"></param>
     public static void ShowContent(Rect position, WindowContent content)
     {
-        Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, true);
         texture2D.SetPixel(0, 0, new Color32(69, 69, 69, 255));
         texture2D.Apply();
         GUIStyle guistyle = new GUIStyle
@@ -67,97 +87,179 @@ public class window : MonoBehaviour
         {
             GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
             {
-
                 content();
-
             }
             GUILayout.EndHorizontal();
         }
         GUILayout.EndArea();
     }
-
-
     /// <summary>
     /// 门派列表窗口
     /// </summary>
-    public static void MenPaiWindow(Rect position, WindowContent content)
+    public static void MenPaiWindow()
     {
-        Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-        texture2D.SetPixel(0, 0, new Color32(69, 69, 69, 255));
-        texture2D.Apply();
-        GUIStyle guistyle = new GUIStyle
+        KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
+        int num = 0;
+
+        foreach (JSONObject jsonobject in jsonData.instance.CyShiLiNameData.list)
         {
-            normal = new GUIStyleState  // 正常样式
+            if (XmGUI.Button(jsonobject["name"].Str))
             {
-                textColor = new Color32(47, 53, 66, 1),
-                background = texture2D
-            },
-            wordWrap = true,    // 自动换行
-            alignment = TextAnchor.UpperCenter,  //对齐方式
-        };
+                player.menPai = (ushort)jsonobject["id"].I;
+                player.onMenPaiChanged((ushort)jsonobject["id"].I);
+                windowStaty.ChangeWindowStat<windowsStat>("MenPaiWindowStat", false);
 
-        GUILayout.BeginArea(position, guistyle);
-        {
-            GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
-            {
-
-                KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
-                int num = 0;
-
-                foreach (JSONObject jsonobject in jsonData.instance.CyShiLiNameData.list)
-                {
-                    if (MyGui.Button(jsonobject["name"].Str))
-                    {
-                        player.menPai = (ushort)jsonobject["id"].I;
-                        window.MenPaiWindowStat = false;
-                    }
-                    num++;
-                    if (num >=3 )
-                    {
-                        MyGui.hr();
-                        num = 0;
-                    }
-                }
-
+                Debug.addLog(String.Format("修改玩家门派为：{0}|{1}", jsonobject["name"].Str, jsonobject["id"].I));
             }
-            GUILayout.EndHorizontal();
+            num++;
+            if (num >= 2)
+            {
+                XmGUI.hr();
+                num = 0;
+            }
         }
-        GUILayout.EndArea();
-
     }
-
     /// <summary>
     /// 职位/称号 列表窗口
     /// </summary>
     public static void ShiLiChengHao()
     {
-        GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+        KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
+        int num = 0;
+        foreach (JSONObject jsonobject in jsonData.instance.ChengHaoJsonData.list)
         {
-            KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
-            int num = 0;
-            foreach (JSONObject jsonobject in jsonData.instance.ChengHaoJsonData.list)
+            if (XmGUI.Button(jsonobject["Name"].Str))
             {
-                if (MyGui.Button(jsonobject["Name"].Str))
-                {
-                    PlayerEx.SetShiLiChengHaoLevel(player.menPai, jsonobject["id"].I + 1);
+                //PlayerEx.SetShiLiChengHaoLevel(player.menPai, jsonobject["id"].I + 1);
 
-                    window.ShiLiChengHaoStat = false;
+                player.ShiLiChengHaoLevel.SetField(player.menPai.ToString(), jsonobject["id"].I + 1);
+
+                windowStaty.ChangeWindowStat<windowsStat>("ShiLiChengHaoStat", false);
+
+                string menPaiName = Tools.Code64(jsonData.instance.ShiLiHaoGanDuName[player.menPai.ToString()]["ChinaText"].str);
+                Debug.addLog(String.Format("修改玩家职位/称号，门派：{0}|{1},称号：{2}|{3}", menPaiName, player.menPai, jsonobject["Name"].Str, jsonobject["id"].I));
+            }
+            num++;
+            if (num >= 2)
+            {
+
+                XmGUI.hr();
+                num = 0;
+            }
+        }
+    }
+    /// <summary>
+    /// 修改玩家血量
+    /// </summary>
+    public static void PlayerHP()
+    {
+        KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
+               
+        var HP = XmGUI.TextField(player.HP.ToString(), 50, 40);
+        player.HP = Script.CheckIsInt(HP);
+        XmGUI.Label("/", 10, 40);
+        var MaxHP = XmGUI.TextField(oldHP_Max.ToString(), 50, 40);
+        if (MaxHP != oldHP_Max.ToString())
+        {
+            Debug.addLog(String.Format("MaxHP:{0},oldHP_Max:{1}", MaxHP, oldHP_Max));
+            player._HP_Max = Script.CheckIsInt(MaxHP);
+            oldHP_Max = player.HP_Max;
+        }
+    }
+    
+    /// <summary>
+    /// 显示右侧TAB按钮组
+    /// </summary>
+    /// <param name="position"></param>
+    public static void RightWindow(Rect position)
+    {
+        if (TabButtonStaty.GetWindowStat<windowsStat>())
+        {
+            
+            GUILayout.BeginArea(position);
+            {
+                foreach (var item in TabButtonStaty)
+                {
+                    if (XmGUI.Button(item.Text, item.Value))
+                    {
+                        TabButtonStaty.ChangeWindowStat<windowsStat>(item.Key, true);
+                        Debug.addLog("切换窗口为：" + item.Text);
+                    }
+                }
+            }
+            GUILayout.EndArea();
+        }
+    }
+
+    /// <summary>
+    /// 关闭按钮
+    /// </summary>
+    /// <param name="position"></param>
+    public static void CloseButton(Rect position)
+    {
+        GUILayout.BeginArea(position);
+        {
+            Texture2D normal = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            normal.SetPixel(0, 0, new Color32(255, 107, 129, 255));    // rgb(255, 107, 129)
+            normal.Apply();
+            Texture2D active = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            active.SetPixel(0, 0, new Color32(112, 161, 255, 255));  // rgba(112, 161, 255,1.0)
+            active.Apply();
+
+            if (XmGUI.Button("关闭", normal, active))
+            {
+                ScriptTrainer.ScriptTrainer.DisplayingWindow = false;
+            }
+        }
+        GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// 获取物品列表
+    /// </summary>
+    public static void ItemWindow(List<item> itemList, KBEngine.Avatar player, int count, string search)
+    {
+        int num = 0;
+        foreach (var item in itemList)
+        {
+            if (search != "")
+            {
+                if (item.itemName.Contains(search))
+                {
+                    if (XmGUI.Button(item.itemNameCN, item.itemIcon))
+                    {
+                        Debug.addLog(item.itemName);
+                        player.addItem(item.itemID, Tools.CreateItemSeid(item.itemID), count);
+                        Singleton.inventory.AddItem(item.itemID);
+                    }
+                    num++;
+                    if (num >= 8)
+                    {
+                        XmGUI.hr();
+                        num = 0;
+                    }
+                }                
+            }
+            else
+            {
+                if (XmGUI.Button(item.itemNameCN, item.itemIcon))
+                {
+                    Debug.addLog(item.itemName);
+                    player.addItem(item.itemID, Tools.CreateItemSeid(item.itemID), count);
+                    Singleton.inventory.AddItem(item.itemID);
                 }
                 num++;
-                if (num >= 3)
+                if (num >= 8)
                 {
-
-                    MyGui.hr();
+                    XmGUI.hr();
                     num = 0;
                 }
             }
+            
         }
-        GUILayout.EndHorizontal();
     }
 
 
-
-
-    public delegate void WindowContent();
+    private static int oldHP_Max = Tools.instance.getPlayer().HP_Max;   // 玩家最大血量
 }
 

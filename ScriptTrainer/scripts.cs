@@ -1,42 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
+using GUIPackage;
 
 public class Script : MonoBehaviour
 {
     /// <summary>
-    /// 获取玩家数据
+    /// 获取游戏数据
     /// </summary>
-    public static void GetPlyaerData()
+    public static void GetGameData()
     {
         try
         {
-            //var playerData = ScriptTrainer.ScriptTrainer.playerData;
+            foreach (var item in jsonData.instance.ItemJsonData)
+            {
+                item i = new item(item.Value["id"].I);
+                ScriptTrainer.ScriptTrainer.itemList.Add(i);
+            }
 
-            PlayerData data = new PlayerData();
-
-            KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家      
-
-            data.age = (int)player.age;
-            data.ZiZhi = player.ZiZhi;
-            data.shouYuan = (int)player.shouYuan;
-            data._shengShi = player._shengShi;
-            data.wuXin = (int)player.wuXin;
-            data._dunSu = player._dunSu;
-
-            ScriptTrainer.ScriptTrainer.playerData = data;
+            Debug.addLog("数据导入完成");
         }
         catch (Exception)
         {
-            Debug.Log("未进入游戏");
+            Debug.addLog("未进入游戏");
         }
 
 
     }
+
     /// <summary>
     /// 检查是否是int
     /// </summary>
@@ -70,6 +61,7 @@ public class Script : MonoBehaviour
         int shengW = PlayerEx.GetMenPaiShengWang();
 
         PlayerEx.AddMenPaiShengWang(change - shengW);
+
     }
     /// <summary>
     /// 修改俸禄
@@ -82,11 +74,38 @@ public class Script : MonoBehaviour
         player.chenghaomag.AddFengLu(change - fengLu);
     }
 
+    /// <summary>
+    /// 修改灵感
+    /// </summary>
+    /// <param name="change"></param>
     public static void ChangeLingGan(int change)
     {
         KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
         player.AddLingGan(change - player.LingGan);
     }
-
+    /// <summary>
+    /// 修改悟道点
+    /// </summary>
+    /// <param name="change"></param>
+    public static void ChangeWuDaoDian(int change)
+    {
+        KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
+        player._WuDaoDian = change;
+    }
    
+    /// <summary>
+    /// 修改宁州声望
+    /// </summary>
+    /// <param name="change"></param>
+    public static void ChangeNingZhouShengWang(int change)
+    {
+        if (change < 0)
+        {
+            PlayerEx.AddNingZhouShengWang((change - PlayerEx.GetNingZhouShengWang()));
+        }
+        else
+        {
+            PlayerEx.AddNingZhouShengWang(change - PlayerEx.GetNingZhouShengWang());
+        }
+    }
 }

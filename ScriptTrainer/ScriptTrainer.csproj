@@ -89,12 +89,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyGui.cs" />
+    <Compile Include="Debug.cs" />
+    <Compile Include="XmGUI.cs" />
     <Compile Include="PlayerData.cs" />
     <Compile Include="scripts.cs" />
     <Compile Include="ScriptTrainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="window.cs" />
+    <Compile Include="windowsStat.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
