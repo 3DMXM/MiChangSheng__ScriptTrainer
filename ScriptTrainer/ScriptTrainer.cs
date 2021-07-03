@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace ScriptTrainer
 {
-    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.0.0.0")]
+    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.0.1.0")]
     public class ScriptTrainer : BaseUnityPlugin
     {
         //public static PlayerData playerData = new PlayerData(); // 玩家属性
@@ -94,30 +94,45 @@ namespace ScriptTrainer
         {
             if (DisplayingWindow)
             {
-                player = Tools.instance.getPlayer();    // 获取玩家
-
-                Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-                // rgba(116, 125, 140,1.0)
-                texture2D.SetPixel(0, 0, new Color32(51, 51, 51, 255));
-                texture2D.Apply();
-                GUIStyle myWindowStyle = new GUIStyle
+                try
                 {
-                    normal = new GUIStyleState  // 正常样式
-                    {
-                        textColor = new Color32(47, 53, 66, 1),
-                        background = texture2D
-                    },
-                    wordWrap = true,    // 自动换行
-                    //alignment = TextAnchor.UpperCenter,  //对齐方式
-                };
-                // 定义一个新窗口
-                int winId = 20210630;
-                windowRect = GUI.Window(winId, windowRect, DoMyWindow, "", myWindowStyle);
 
-                float windowW = 210f;
-                window.LeftWindow(new Rect(windowRect.x - windowW, windowRect.y, windowW, windowRect.height));      // 左侧菜单
-                window.RightWindow(new Rect(windowRect.x + windowRect.width, windowRect.y + 40, windowW, windowRect.height));   // 右侧菜单
-                window.CloseButton(new Rect(windowRect.x + windowRect.width, windowRect.y, 80,40)); // 关闭按钮
+                    player = Tools.instance.getPlayer();    // 获取玩家 
+                    if (player.ToString() == "")
+                    {
+                        Debug.addLog("未进入游戏");
+                        return;
+                    }
+
+                    Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                    // rgba(116, 125, 140,1.0)
+                    texture2D.SetPixel(0, 0, new Color32(51, 51, 51, 255));
+                    texture2D.Apply();
+                    GUIStyle myWindowStyle = new GUIStyle
+                    {
+                        normal = new GUIStyleState  // 正常样式
+                        {
+                            textColor = new Color32(47, 53, 66, 1),
+                            background = texture2D
+                        },
+                        wordWrap = true,    // 自动换行
+                                            //alignment = TextAnchor.UpperCenter,  //对齐方式
+                    };
+                    // 定义一个新窗口
+                    int winId = 20210630;
+                    windowRect = GUI.Window(winId, windowRect, DoMyWindow, "", myWindowStyle);
+
+                    float windowW = 210f;
+                    window.LeftWindow(new Rect(windowRect.x - windowW, windowRect.y, windowW, windowRect.height));      // 左侧菜单
+                    window.RightWindow(new Rect(windowRect.x + windowRect.width, windowRect.y + 40, windowW, windowRect.height));   // 右侧菜单
+                    window.CloseButton(new Rect(windowRect.x + windowRect.width, windowRect.y, 80, 40)); // 关闭按钮
+                }
+                catch (Exception e)
+                {
+                    Debug.addLog(String.Format("错误：{0}.", e.Message));
+                }
+
+
             }
         }
 
@@ -341,8 +356,8 @@ namespace ScriptTrainer
                         }
                         {
                             XmGUI.Label("神识");
-                            var ItemText = XmGUI.TextField(player.shengShi.ToString());
-                            player.shengShi = Script.CheckIsInt(ItemText);
+                            window.PlayerShengShi(player);
+                            
                         }
                         {
                             XmGUI.Label("悟性");
@@ -351,8 +366,7 @@ namespace ScriptTrainer
                         } 
                         {
                             XmGUI.Label("遁速");
-                            var ItemText = XmGUI.TextField(player.dunSu.ToString());
-                            player.dunSu = Script.CheckIsInt(ItemText);
+                            window.PlayerDunSu(player);
                         }                       
 
                     }

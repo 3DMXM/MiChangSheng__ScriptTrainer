@@ -166,7 +166,34 @@ public class window : MonoBehaviour
             oldHP_Max = player.HP_Max;
         }
     }
-    
+    /// <summary>
+    /// 修改玩家神识
+    /// </summary>
+    public static void PlayerShengShi(KBEngine.Avatar player)
+    {
+        //KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家
+
+        var ItemText = XmGUI.TextField(oldShengShi.ToString());
+        if (ItemText != oldShengShi.ToString())
+        {
+            player.shengShi = Script.CheckIsInt(ItemText);
+            oldShengShi = player.shengShi;
+        }
+    }
+    /// <summary>
+    /// 修改玩家遁速
+    /// </summary>
+    /// <param name="player"></param>
+    public static void PlayerDunSu(KBEngine.Avatar player)
+    {
+        var ItemText = XmGUI.TextField(oldDunSu.ToString());
+        if (ItemText != oldDunSu.ToString())
+        {
+            player.dunSu = Script.CheckIsInt(ItemText);
+            oldDunSu = player.dunSu;
+        }
+    }
+
     /// <summary>
     /// 显示右侧TAB按钮组
     /// </summary>
@@ -261,5 +288,7 @@ public class window : MonoBehaviour
 
 
     private static int oldHP_Max = Tools.instance.getPlayer().HP_Max;   // 玩家最大血量
+    private static int oldShengShi = Tools.instance.getPlayer().shengShi;   // 玩家神识
+    private static int oldDunSu = Tools.instance.getPlayer().dunSu;         // 玩家遁速
 }
 
