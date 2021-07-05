@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Debug.cs" />
+    <Compile Include="ItemData.cs" />
     <Compile Include="XmGUI.cs" />
     <Compile Include="PlayerData.cs" />
     <Compile Include="scripts.cs" />

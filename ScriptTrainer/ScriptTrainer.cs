@@ -8,12 +8,11 @@ using Random = UnityEngine.Random;
 
 namespace ScriptTrainer
 {
-    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.0.1.0")]
+    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.1.0.0")]
     public class ScriptTrainer : BaseUnityPlugin
     {
         //public static PlayerData playerData = new PlayerData(); // 玩家属性
         public static KBEngine.Avatar player;   //获取玩家
-        public static List<item> itemList = new List<item>();  // 物品列表
 
         // 窗口相关
         public static bool DisplayingWindow;
@@ -45,7 +44,7 @@ namespace ScriptTrainer
             Debug.addLog("脚本已启动");
 
             // 获取游戏数据
-            Script.GetGameData();
+            //Script.GetGameData();
             // 计算区域
             ComputeRect();
         }
@@ -57,6 +56,7 @@ namespace ScriptTrainer
                 DisplayingWindow = !DisplayingWindow;
                 if (DisplayingWindow)
                 {
+                    new ItemData();
                     Debug.addLog("打开窗口");
                 }
                 else
@@ -73,7 +73,7 @@ namespace ScriptTrainer
 
             // 主窗口居中
             int num = Mathf.Min(Screen.width, 740);
-            int num2 = (Screen.height < 400) ? Screen.height : (400);
+            int num2 = (Screen.height < 400) ? Screen.height : (450);
             int num3 = Mathf.RoundToInt((float)(Screen.width - num) / 2f);
             int num4 = Mathf.RoundToInt((float)(Screen.height - num2) / 2f);
             this.windowRect = new Rect((float)num3, (float)num4, (float)num, (float)num2);
@@ -84,7 +84,7 @@ namespace ScriptTrainer
             this.HeaderTitleRect = new Rect(5, 5, (float)num - 40, (float)num2 - 40);
 
             // 中间窗口
-            this.TableRect = new Rect(0, 40, (float)num - 30, 300);
+            this.TableRect = new Rect(0, 40, (float)num - 30, (float)400);
 
             
         }
@@ -180,8 +180,6 @@ namespace ScriptTrainer
             GUI.DragWindow();
         }
 
-
-
         // 窗口标题
         void HeaderTitle(Rect HeaderTitleRect)
         {
@@ -276,6 +274,7 @@ namespace ScriptTrainer
                         {
                             player.HP = player.HP_Max;
                         }
+
                     }
                     GUILayout.EndHorizontal();
 
@@ -320,6 +319,7 @@ namespace ScriptTrainer
                         }
                     }
                     GUILayout.EndHorizontal();
+
                 }
                 GUILayout.EndScrollView();
 
@@ -532,37 +532,33 @@ namespace ScriptTrainer
         {
             GUILayout.BeginArea(TableRect);
             {
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
-                {
-                    // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                  
+                // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                  
 
-                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                {
+                    XmGUI.Label("获取物品", 80, 40);
+                    XmGUI.Label("ID", 30, 40);
+                    //int ItemID = 0;
+                    ItemID = Script.CheckIsInt(XmGUI.TextField(ItemID.ToString(), 40, 40));
+                    XmGUI.Label("数量", 30, 40);
+                    //int count = 1;
+                    count = Script.CheckIsInt(XmGUI.TextField(count.ToString(), 40, 40));
+                    if (XmGUI.Button("获取", 50, 20))
                     {
-                        XmGUI.Label("获取物品", 80, 40);
-                        XmGUI.Label("ID", 30, 40);
-                        //int ItemID = 0;
-                        ItemID = Script.CheckIsInt(XmGUI.TextField(ItemID.ToString(), 40, 40));
-                        XmGUI.Label("数量", 30, 40);
-                        //int count = 1;
-                        count = Script.CheckIsInt(XmGUI.TextField(count.ToString(), 40, 40));
-                        if (XmGUI.Button("获取", 50, 20))
+                        if (ItemID != 0)
                         {
-                            if (ItemID != 0)
-                            {
-                                player.addItem(ItemID, Tools.CreateItemSeid(ItemID), count);
-                                Singleton.inventory.AddItem(ItemID);
-                            }
+                            player.addItem(ItemID, Tools.CreateItemSeid(ItemID), count);
+                            Singleton.inventory.AddItem(ItemID);
                         }
-                        //XmGUI.Label("搜索");
-                        //search = XmGUI.TextField(search);
                     }
-                    XmGUI.hr();
-                    {
-                        //window.ItemWindow(itemList, player, count, search);
-                    }
-                    GUILayout.EndHorizontal();
+                    XmGUI.Label("搜索");
+                    search = XmGUI.TextField(search);
                 }
-                GUILayout.EndScrollView();
+                XmGUI.hr();
+                {
+                    ItemData.ItemWindow(player, count, search);
+                }
+                GUILayout.EndHorizontal();
             }
             GUILayout.EndArea();
         }

@@ -1,68 +1,73 @@
 ﻿using System.Collections.Generic;
 
-
-public class windowsStat
+namespace ScriptTrainer
 {
-    public string Key { get; set; }
-    public bool Value { get; set; }
-    public string Text { get; set; }
-
-    public List<windowsStat> list;
 
 
-}
 
-
-public static class SetWindowsStatFun
-{
-    /// <summary>
-    /// 切换窗口状态
-    /// </summary>
-    /// <param name="key">设置的值</param>
-    /// <param name="stat">设置的状态</param>
-    public static void ChangeWindowStat<T>(this List<windowsStat> source, string key, bool stat)
+    public class windowsStat
     {
-        foreach (var item in source)
-        {
-            if (item.Key == key)
-            {
-                item.Value = stat;
-            }
-            else
-            {
-                item.Value = false;
-            }
-        }
+        public string Key { get; set; }
+        public bool Value { get; set; }
+        public string Text { get; set; }
+
+        public List<windowsStat> list;
+
+
     }
-    /// <summary>
-    /// 获取窗口是否开启
-    /// </summary>
-    /// <returns></returns>
-    public static bool GetWindowStat<T>(this List<windowsStat> source)
+
+
+    public static class SetWindowsStatFun
     {
-        foreach (var item in source)
+        /// <summary>
+        /// 切换窗口状态
+        /// </summary>
+        /// <param name="key">设置的值</param>
+        /// <param name="stat">设置的状态</param>
+        public static void ChangeWindowStat<T>(this List<windowsStat> source, string key, bool stat)
         {
-            if (item.Value)
+            foreach (var item in source)
             {
-                return true;
+                if (item.Key == key)
+                {
+                    item.Value = stat;
+                }
+                else
+                {
+                    item.Value = false;
+                }
             }
         }
-        return false;
-    }
-    /// <summary>
-    /// 获取单独窗口是否开启
-    /// </summary>
-    /// <param name="key">窗口key</param>
-    /// <returns></returns>
-    public static bool GetWindowStat<T>(this List<windowsStat> source, string key)
-    {
-        foreach (var item in source)
+        /// <summary>
+        /// 获取窗口是否开启
+        /// </summary>
+        /// <returns></returns>
+        public static bool GetWindowStat<T>(this List<windowsStat> source)
         {
-            if (item.Key == key && item.Value)
+            foreach (var item in source)
             {
-                return true;
+                if (item.Value)
+                {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
+        /// <summary>
+        /// 获取单独窗口是否开启
+        /// </summary>
+        /// <param name="key">窗口key</param>
+        /// <returns></returns>
+        public static bool GetWindowStat<T>(this List<windowsStat> source, string key)
+        {
+            foreach (var item in source)
+            {
+                if (item.Key == key && item.Value)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
