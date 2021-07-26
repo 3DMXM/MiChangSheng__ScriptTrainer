@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MyGui : MonoBehaviour
 {
@@ -25,7 +20,7 @@ public class MyGui : MonoBehaviour
             UILabel newLabel = new UILabel();
             GUILayout.Label(text, guistyle);
         }
-        GUILayout.EndHorizontal();       
+        GUILayout.EndHorizontal();
     }
 
     public static bool Button(string text)

@@ -8,9 +8,13 @@ using Random = UnityEngine.Random;
 
 namespace ScriptTrainer
 {
-    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.1.0.0")]
+    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", Description, Version)]
     public class ScriptTrainer : BaseUnityPlugin
     {
+        public const string Version = "1.1.0.0";
+
+        public const string Description = "【觅长生】内置修改器";
+
         //public static PlayerData playerData = new PlayerData(); // 玩家属性
         public static KBEngine.Avatar player;   //获取玩家
 

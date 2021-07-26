@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace ScriptTrainer
 {
-
-
     class ItemData : MonoBehaviour
     {
         public static List<item> itemList = new List<item>();  // 物品列表
