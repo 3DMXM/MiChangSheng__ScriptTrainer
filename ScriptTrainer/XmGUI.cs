@@ -202,6 +202,23 @@ namespace ScriptTrainer
             };
             GUILayout.Label(text, guistyle);
         }
+
+        public static void Label(string text, RectOffset margin)
+        {
+            GUIStyle guistyle = new GUIStyle()
+            {
+                fixedWidth = 50,
+                fixedHeight = 40,
+                alignment = TextAnchor.MiddleRight,
+                normal = new GUIStyleState
+                {
+                    textColor = Color.white
+                },
+                margin = margin
+            };
+            GUILayout.Label(text, guistyle);
+        }
+
         public static void Label(string text, int width, int height)
         {
             GUIStyle guistyle = new GUIStyle()

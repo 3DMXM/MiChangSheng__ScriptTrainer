@@ -1,4 +1,5 @@
-﻿using GUIPackage;
+﻿using Fungus;
+using GUIPackage;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,7 +25,8 @@ namespace ScriptTrainer
             new windowsStat(){Key = "BasicScripts", Value = true , Text = "基础功能"},
             new windowsStat(){Key = "PlayerAttributes", Value = false , Text = "玩家属性"},
             new windowsStat(){Key = "PlayerWuDao", Value = false , Text = "悟道"},
-            new windowsStat(){Key = "playerItem", Value = false, Text = "物品"}
+            new windowsStat(){Key = "playerItem", Value = false, Text = "物品"},
+            new windowsStat(){Key = "NPC", Value = false, Text = "NPC选项"}
         };
 
 
@@ -135,13 +137,14 @@ namespace ScriptTrainer
                 if (XmGUI.Button(jsonobject["Name"].Str))
                 {
                     //PlayerEx.SetShiLiChengHaoLevel(player.menPai, jsonobject["id"].I + 1);
-
-                    player.ShiLiChengHaoLevel.SetField(player.menPai.ToString(), jsonobject["id"].I + 1);
+                    //player.ShiLiChengHaoLevel.SetField(player.menPai.ToString(), jsonobject["id"].I + 1);
 
                     windowStaty.ChangeWindowStat<windowsStat>("ShiLiChengHaoStat", false);
 
                     string menPaiName = Tools.Code64(jsonData.instance.ShiLiHaoGanDuName[player.menPai.ToString()]["ChinaText"].str);
-                    Debug.addLog(String.Format("修改玩家职位/称号，门派：{0}|{1},称号：{2}|{3}", menPaiName, player.menPai, jsonobject["Name"].Str, jsonobject["id"].I));
+                    Debug.addLog(String.Format("修改玩家职位/称号，门派：{0}|{1},称号：{2}|{3}", menPaiName, PlayerEx.Player.menPai, jsonobject["Name"].Str, jsonobject["id"].I));
+
+                    Debug.addLog(PlayerEx.GetMenPaiChengHao());
                 }
                 num++;
                 if (num >= 2)
@@ -245,10 +248,23 @@ namespace ScriptTrainer
             GUILayout.EndArea();
         }
 
+        public static void NPCExp(UINPCData npc)
+        {
+            var Exp = XmGUI.TextField(npc.Exp.ToString(), 50, 40);
+            npc.Exp = Script.CheckIsInt(Exp);
+            XmGUI.Label("/", 10, 40);
+            XmGUI.Label(jsonData.instance.LevelUpDataJsonData[npc.Level.ToString()]["MaxExp"].I.ToString(), 50, 40);
+            if (XmGUI.Button("满", 20, 20))
+            {
+                npc.Exp = jsonData.instance.LevelUpDataJsonData[npc.Level.ToString()]["MaxExp"].I;
+            }
+        }
 
         private static int oldHP_Max = Tools.instance.getPlayer().HP_Max;   // 玩家最大血量
         private static int oldShengShi = Tools.instance.getPlayer().shengShi;   // 玩家神识
         private static int oldDunSu = Tools.instance.getPlayer().dunSu;         // 玩家遁速
+
+        
     }
 
 }

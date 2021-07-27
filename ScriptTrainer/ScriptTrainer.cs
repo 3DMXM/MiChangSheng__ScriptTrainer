@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace ScriptTrainer
 {
-    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.1.0.0")]
+    [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", "【觅长生】内置修改器", "1.2.0")]
     public class ScriptTrainer : BaseUnityPlugin
     {
         //public static PlayerData playerData = new PlayerData(); // 玩家属性
@@ -171,6 +171,9 @@ namespace ScriptTrainer
 
                     // 玩家物品
                     if (window.TabButtonStaty.GetWindowStat<windowsStat>("playerItem")) this.UserItemTable(TableRect);
+
+                    // NPC
+                    if (window.TabButtonStaty.GetWindowStat<windowsStat>("NPC")) this.NpcTable(TableRect);
 
                 }
                 GUILayout.EndArea();
@@ -456,7 +459,7 @@ namespace ScriptTrainer
         {
             GUILayout.BeginArea(TableRect);
             {
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(TableRect.width), GUILayout.Height(TableRect.height));
                 {
                     // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                    
 
@@ -527,7 +530,7 @@ namespace ScriptTrainer
 
         }
 
-        // 玩家物品修改
+        // 玩家物品获取
         void UserItemTable(Rect TableRect)
         {
             GUILayout.BeginArea(TableRect);
@@ -559,6 +562,97 @@ namespace ScriptTrainer
                     ItemData.ItemWindow(player, count, search);
                 }
                 GUILayout.EndHorizontal();
+            }
+            GUILayout.EndArea();
+        }
+
+        // NPC选项
+        void NpcTable(Rect TableRect)
+        {
+            GUILayout.BeginArea(TableRect);
+            {
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(TableRect.width), GUILayout.Height(TableRect.height));
+                {
+                    var npc = UINPCJiaoHu.Inst.NowJiaoHuNPC;
+                    if (npc == null)
+                    {
+                        GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                        {
+
+                            XmGUI.Label("未选择NPC", new RectOffset(300, 300, 20, 50));
+
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.EndScrollView();
+                            GUILayout.EndArea();
+                        }
+
+                        return;
+                    }
+                    XmGUI.Title("NPC属性");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
+                    {                        
+                        {
+                            XmGUI.Label("名称");
+                            var ItemText = XmGUI.TextField(npc.Name);
+                            //npc.Name = ItemText;
+                        }
+                        {
+                            XmGUI.Label("年龄");
+                            var ItemText = XmGUI.TextField(npc.Age.ToString());
+                            npc.Age = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("寿元");
+                            var ItemText = XmGUI.TextField(npc.ShouYuan.ToString());
+                            npc.ShouYuan = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("血气");
+                            var ItemText = XmGUI.TextField(npc.HP.ToString());
+                            npc.HP = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("资质")
+;                           var ItemText = XmGUI.TextField(npc.ZiZhi.ToString());
+                            npc.ZiZhi = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("悟性");
+                            var ItemText = XmGUI.TextField(npc.WuXing.ToString());
+                            npc.WuXing = Script.CheckIsInt(ItemText);
+                        }
+                    }
+                    XmGUI.hr();
+                    {
+                        {
+                            XmGUI.Label("好感");
+                            var ItemText = XmGUI.TextField(npc.Favor.ToString());
+                            Script.ChangeNPCFavor(Script.CheckIsInt(ItemText), npc);
+                        }
+                        {
+                            XmGUI.Label("情分");
+                            var ItemText = XmGUI.TextField(npc.QingFen.ToString());
+                            Script.ChangeNPCQingFen(Script.CheckIsInt(ItemText), npc);
+                        }
+                        {
+                            XmGUI.Label("遁速");
+                            var ItemText = XmGUI.TextField(npc.DunSu.ToString());
+                            npc.DunSu = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("神识");
+                            var ItemText = XmGUI.TextField(npc.ShenShi.ToString());
+                            npc.ShenShi = Script.CheckIsInt(ItemText);
+                        }
+                        {
+                            XmGUI.Label("修为");
+                            window.NPCExp(npc);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.EndScrollView();
             }
             GUILayout.EndArea();
         }
