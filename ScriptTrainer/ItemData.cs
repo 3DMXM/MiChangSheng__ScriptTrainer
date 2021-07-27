@@ -1,24 +1,21 @@
-﻿using GUIPackage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using GUIPackage;
 using UnityEngine;
 
 namespace ScriptTrainer
 {
-
-
-    class ItemData : MonoBehaviour
+    internal class ItemData : MonoBehaviour
     {
         public static List<item> itemList = new List<item>();  // 物品列表
 
-        public ItemData()
+        public static void LoadIfNeeded()
         {
-            foreach (var item in jsonData.instance.ItemJsonData)
+            if (itemList?.Count == 0)
             {
-                itemList.Add(new item(item.Value["id"].I));
+                foreach (KeyValuePair<string, JSONObject> item in jsonData.instance.ItemJsonData)
+                {
+                    itemList.Add(new item(item.Value["id"].I));
+                }
             }
         }
 
@@ -35,7 +32,7 @@ namespace ScriptTrainer
             }
 
             List<item> list = new List<item>();
-            foreach (var item in itemList)
+            foreach (item item in itemList)
             {
                 if ((int)item.itemType == (int)type)
                 {
@@ -48,7 +45,7 @@ namespace ScriptTrainer
         {
             List<item> list = new List<item>();
 
-            foreach (var item in itemList)
+            foreach (item item in itemList)
             {
                 if (item.itemType == type)
                 {
@@ -67,7 +64,7 @@ namespace ScriptTrainer
         {
             List<item> list = new List<item>();
 
-            foreach (var item in itemList)
+            foreach (item item in itemList)
             {
                 if (item.quality == quality)
                 {
@@ -80,7 +77,7 @@ namespace ScriptTrainer
         {
             List<item> list = new List<item>();
 
-            foreach (var item in itemList)
+            foreach (item item in itemList)
             {
                 if (item.quality == quality)
                 {
@@ -104,7 +101,7 @@ namespace ScriptTrainer
             }
 
             List<item> newList = new List<item>();
-            foreach (var item in list)
+            foreach (item item in list)
             {
                 if (search != "")
                 {
@@ -112,7 +109,7 @@ namespace ScriptTrainer
                     {
                         newList.Add(item);
                     }
-                }                
+                }
             }
             return newList;
         }
@@ -129,7 +126,7 @@ namespace ScriptTrainer
         public static void Pagination(List<item> list, KBEngine.Avatar player, int count, int page = 1, int limit = 24)
         {
             GUILayout.BeginArea(new Rect(20, 45, 700, 320));
-            {               
+            {
                 GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperCenter });
                 {
                     int beginNum = (page - 1) * limit;
@@ -144,11 +141,11 @@ namespace ScriptTrainer
                         // QualityColors
 
 
-                        var item = list[i];
+                        item item = list[i];
 
                         if (XmGUI.Button(item.itemNameCN, item.itemIcon))
                         {
-                            Debug.addLog(String.Format("获取物品：{0}，数量{1}", item.itemName, count));
+                            Debug.addLog(string.Format("获取物品：{0}，数量{1}", item.itemName, count));
                             player.addItem(item.itemID, Tools.CreateItemSeid(item.itemID), count);
                             Singleton.inventory.AddItem(item.itemID);
                         }
@@ -193,11 +190,11 @@ namespace ScriptTrainer
                 new myItemType() {type =  ItemTypes.秘药, name = "秘药"},
                 new myItemType() {type =  ItemTypes.其他, name = "其他"},
             };
-            GUILayout.BeginArea(new Rect(640,0, 700, 600));
+            GUILayout.BeginArea(new Rect(640, 0, 700, 600));
             {
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(100), GUILayout.Height(350));
                 {
-                    foreach (var item in typeList)
+                    foreach (myItemType item in typeList)
                     {
                         Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
                         if (item.type == type)
@@ -244,7 +241,7 @@ namespace ScriptTrainer
         {
             ItemTypeWindow();   // 物品类型
 
-            var myItem = GetDataForType(type);
+            List<item> myItem = GetDataForType(type);
             myItem = FilterItemData(myItem, search);
             Pagination(myItem, player, count, nowPage);
         }
@@ -260,7 +257,7 @@ namespace ScriptTrainer
         private static ItemTypes type = (ItemTypes)999;
         private static Vector2 scrollPosition;
 
-      
+
 
     }
 
