@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using UnityEngine;
 using GUIPackage;
+using Fungus;
 
 namespace ScriptTrainer
 {
@@ -14,20 +15,20 @@ namespace ScriptTrainer
         /// </summary>
         public static void GetGameData()
         {
-            try
-            {
-                //foreach (var item in jsonData.instance.ItemJsonData)
-                //{
-                //    item i = new item(item.Value["id"].I);
-                //    ItemData.itemList.Add(i);
-                //}
+            //try
+            //{
+            //    //foreach (var item in jsonData.instance.ItemJsonData)
+            //    //{
+            //    //    item i = new item(item.Value["id"].I);
+            //    //    ItemData.itemList.Add(i);
+            //    //}
 
-                Debug.addLog("数据导入完成");
-            }
-            catch (Exception)
-            {
-                Debug.addLog("未进入游戏");
-            }
+            //    Debug.addLog("数据导入完成");
+            //}
+            //catch (Exception)
+            //{
+            //    Debug.addLog("未进入游戏");
+            //}
 
 
         }
@@ -39,7 +40,7 @@ namespace ScriptTrainer
         public static int CheckIsInt(string ItemText)
         {
             int newCount = 0;
-            ItemText = Regex.Replace(ItemText, @"[^0-9.]", "");
+            ItemText = Regex.Replace(ItemText, @"[\-?][^0-9.]", "");
             try
             {
                 if (ItemText != null && ItemText.Length < 10 && ItemText.Length != 0)
@@ -63,9 +64,10 @@ namespace ScriptTrainer
         public static void ChangeMenPaiShengWang(int change)
         {
             int shengW = PlayerEx.GetMenPaiShengWang();
-
-            PlayerEx.AddMenPaiShengWang(change - shengW);
-
+            if (change != shengW)
+            {
+                PlayerEx.AddMenPaiShengWang(change - shengW);
+            }
         }
         /// <summary>
         /// 修改俸禄
@@ -75,7 +77,10 @@ namespace ScriptTrainer
         {
             KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
             int fengLu = player.chenghaomag.GetAllFengLuMoney();
-            player.chenghaomag.AddFengLu(change - fengLu);
+            if (change != fengLu)
+            {
+                player.chenghaomag.AddFengLu(change - fengLu);
+            }
         }
 
         /// <summary>
@@ -85,17 +90,12 @@ namespace ScriptTrainer
         public static void ChangeLingGan(int change)
         {
             KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
-            player.AddLingGan(change - player.LingGan);
+            if (change != player.LingGan)
+            {
+                player.AddLingGan(change - player.LingGan);
+            }
         }
-        /// <summary>
-        /// 修改悟道点
-        /// </summary>
-        /// <param name="change"></param>
-        public static void ChangeWuDaoDian(int change)
-        {
-            KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家 
-            player._WuDaoDian = change;
-        }
+       
 
         /// <summary>
         /// 修改宁州声望
@@ -103,14 +103,39 @@ namespace ScriptTrainer
         /// <param name="change"></param>
         public static void ChangeNingZhouShengWang(int change)
         {
-            if (change < 0)
-            {
-                PlayerEx.AddNingZhouShengWang((change - PlayerEx.GetNingZhouShengWang()));
-            }
-            else
+            if (change != PlayerEx.GetNingZhouShengWang())
             {
                 PlayerEx.AddNingZhouShengWang(change - PlayerEx.GetNingZhouShengWang());
+            }            
+        }
+
+        /// <summary>
+        /// 修改NPC好感度
+        /// </summary>
+        /// <param name="change"></param>
+        public static void ChangeNPCFavor(int change, UINPCData npc)
+        {
+            if (change != npc.Favor)
+            {
+                NPCEx.AddFavor(npc.ID, change - npc.Favor, false, true);
+                npc.Favor = change;
             }
+        }
+        /// <summary>
+        /// 修改NPC情分
+        /// </summary>
+        /// <param name="change"></param>
+        /// <param name="npc"></param>
+        public static void ChangeNPCQingFen(int change, UINPCData npc)
+        {
+            //UI_ErrorHint._instance.errorShow(jsonData.instance.AvatarRandomJsonData[npcid.ToString()]["Name"].Str + "对你的好感度" + str, showType);
+            if (change != npc.QingFen)
+            {
+                UI_ErrorHint._instance.errorShow(String.Format("你和{0}的情分提升了{1}", npc.Name, change - npc.QingFen), 0);
+                NPCEx.AddQingFen(npc.ID, change - npc.QingFen);
+                npc.QingFen = change;
+            }
+           
         }
     }
 }
