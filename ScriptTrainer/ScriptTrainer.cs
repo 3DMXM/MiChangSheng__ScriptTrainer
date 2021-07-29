@@ -10,9 +10,9 @@ namespace ScriptTrainer
     [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", Description, Version)]
     public class ScriptTrainer : BaseUnityPlugin
     {
-        public const string Version = "1.2.0";
+        public const string Version = "1.2.1";
 
-        public const string Description = "【觅长生】内置修改器 快捷键F9";
+        public const string Description = "【觅长生】内置修改器";
 
         //public static PlayerData playerData = new PlayerData(); // 玩家属性
         public static KBEngine.Avatar player;   //获取玩家
