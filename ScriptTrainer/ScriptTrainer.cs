@@ -362,31 +362,56 @@ namespace ScriptTrainer
                         {
                             XmGUI.Label("年龄");
                             string ItemText = XmGUI.TextField(player.age.ToString());
-                            player.age = (uint)Script.CheckIsInt(ItemText);
+                            if (ItemText != player.age.ToString())
+                            {
+                                player.age = (uint)Script.CheckIsInt(ItemText);
+                            }
                         }
                         {
                             XmGUI.Label("寿元");
                             string ItemText = XmGUI.TextField(player.shouYuan.ToString());
-                            player.shouYuan = (uint)Script.CheckIsInt(ItemText);
+                            if (ItemText != player.shouYuan.ToString())
+                            {
+                                player.shouYuan = (uint)Script.CheckIsInt(ItemText);
+                            }
                         }
                         {
                             XmGUI.Label("资质");
                             string ItemText = XmGUI.TextField(player.ZiZhi.ToString());
-                            player.ZiZhi = Script.CheckIsInt(ItemText);
+                            if (ItemText != player.ZiZhi.ToString())
+                            {
+                                player.ZiZhi = Script.CheckIsInt(ItemText);
+
+                            }
                         }
                         {
                             XmGUI.Label("神识");
-                            window.PlayerShengShi(player);
+                            var ItemText = XmGUI.TextField(player.shengShi.ToString());
+                            if (ItemText != player.shengShi.ToString())
+                            {
+                                player.shengShi = Script.CheckIsInt(ItemText);
+                                //oldShengShi = player.shengShi;
+                            }
+                            //window.PlayerShengShi(player);
 
                         }
                         {
                             XmGUI.Label("悟性");
                             string ItemText = XmGUI.TextField(player.wuXin.ToString());
-                            player.wuXin = (uint)Script.CheckIsInt(ItemText);
+                            if (ItemText != player.wuXin.ToString())
+                            {
+                                player.wuXin = (uint)Script.CheckIsInt(ItemText);
+                            }
                         }
                         {
                             XmGUI.Label("遁速");
-                            window.PlayerDunSu(player);
+                            var ItemText = XmGUI.TextField(player.dunSu.ToString());
+                            if (ItemText != player.dunSu.ToString())
+                            {
+                                player.dunSu = Script.CheckIsInt(ItemText);
+                            }
+
+                            //window.PlayerDunSu(player);
                         }
 
                     }
@@ -395,23 +420,33 @@ namespace ScriptTrainer
                         {
                             XmGUI.Label("心境");
                             string ItemText = XmGUI.TextField(player.xinjin.ToString());
-                            player.xinjin = Script.CheckIsInt(ItemText);
+                            if (ItemText != player.xinjin.ToString())
+                            {
+                                player.xinjin = Script.CheckIsInt(ItemText);
+
+                            }
                         }
                         {
                             XmGUI.Label("丹毒");
                             string ItemText = XmGUI.TextField(player.Dandu.ToString());
-                            player.Dandu = Script.CheckIsInt(ItemText);
+                            if (ItemText != player.Dandu.ToString())
+                            {
+                                player.Dandu = Script.CheckIsInt(ItemText);
+
+                            }
                         }
                         {
                             XmGUI.Label("灵感");
                             string ItemText = XmGUI.TextField(player.LingGan.ToString());
-                            //player.LingGan = Script.CheckIsInt(ItemText);
                             Script.ChangeLingGan(Script.CheckIsInt(ItemText));
                         }
                         {
                             XmGUI.Label("修为");
                             string ItemText = XmGUI.TextField(player.exp.ToString());
-                            player.exp = (ulong)Script.CheckIsInt(ItemText);
+                            if (ItemText != player.exp.ToString())
+                            {
+                                player.exp = (ulong)Script.CheckIsInt(ItemText);
+                            }
                         }
                         {
                             XmGUI.Label("生命");
