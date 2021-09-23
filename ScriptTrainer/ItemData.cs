@@ -150,7 +150,7 @@ namespace ScriptTrainer
                             Singleton.inventory.AddItem(item.itemID);
                         }
                         num++;
-                        if (num >= 8)
+                        if (num >= 5)
                         {
                             XmGUI.hr();
                             num = 0;

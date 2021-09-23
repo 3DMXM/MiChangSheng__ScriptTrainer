@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScriptTrainer.UI;
+using System;
 using UnityEngine;
 
 namespace ScriptTrainer
@@ -22,99 +23,28 @@ namespace ScriptTrainer
                         textColor = Color.white
                     }
                 };
-                UILabel newLabel = new UILabel();
+                // UILabel newLabel = new UILabel();
                 GUILayout.Label(text, guistyle);
             }
             GUILayout.EndHorizontal();
         }
+
         public static bool Button(string text)
         {
-            Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D.SetPixel(0, 0, new Color32(30, 144, 255, 255));    // rgba(30, 144, 255,1.0)
-            texture2D.Apply();
-            Texture2D texture2D2 = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D2.SetPixel(0, 0, new Color32(112, 161, 255, 255));  // rgba(112, 161, 255,1.0)
-            texture2D2.Apply();
-
-            GUIStyle guistyle = new GUIStyle()
-            {
-                normal = new GUIStyleState  // 正常样式
-                {
-                    textColor = Color.white,
-                    background = texture2D
-                },
-                active = new GUIStyleState  // 点击样式
-                {
-                    textColor = Color.white,
-                    background = texture2D2
-                },
-                wordWrap = true,
-                alignment = TextAnchor.MiddleCenter,
-                fixedHeight = 40,
-                fixedWidth = 80,
-                margin = new RectOffset(5, 7, 0, 5),
-            };
-
-            return GUILayout.Button(text, guistyle);
+            return GUILayout.Button(text, XmUIStyle.ButtonStyle);
         }
         public static bool Button(string text, int width, int height)
         {
-            Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D.SetPixel(0, 0, new Color32(30, 144, 255, 255));    // rgba(30, 144, 255,1.0)
-            texture2D.Apply();
-            Texture2D texture2D2 = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D2.SetPixel(0, 0, new Color32(112, 161, 255, 255));  // rgba(112, 161, 255,1.0)
-            texture2D2.Apply();
-
-            GUIStyle guistyle = new GUIStyle()
-            {
-                normal = new GUIStyleState  // 正常样式
-                {
-                    textColor = Color.white,
-                    background = texture2D
-                },
-                active = new GUIStyleState  // 点击样式
-                {
-                    textColor = Color.white,
-                    background = texture2D2
-                },
-                wordWrap = true,
-                alignment = TextAnchor.MiddleCenter,
-                fixedHeight = height,
-                fixedWidth = width,
-                margin = new RectOffset(5, 7, (40 - height) / 2, 5),
-            };
+            GUIStyle guistyle = XmUIStyle.ButtonStyle;
+            guistyle.fixedWidth = width;
+            guistyle.fixedHeight = height;
+            guistyle.margin = new RectOffset(5, 7, (40 - height) / 2, 5);
 
             return GUILayout.Button(text, guistyle);
         }
         public static bool Button(Rect position, string text)
         {
-            Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D.SetPixel(0, 0, new Color32(30, 144, 255, 255));    // rgba(30, 144, 255,1.0)
-            texture2D.Apply();
-            Texture2D texture2D2 = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture2D2.SetPixel(0, 0, new Color32(112, 161, 255, 255));  // rgba(112, 161, 255,1.0)
-            texture2D2.Apply();
-
-            GUIStyle guistyle = new GUIStyle()
-            {
-                normal = new GUIStyleState  // 正常样式
-                {
-                    textColor = Color.white,
-                    background = texture2D
-                },
-                active = new GUIStyleState  // 点击样式
-                {
-                    textColor = Color.white,
-                    background = texture2D2
-                },
-                wordWrap = true,
-                alignment = TextAnchor.MiddleCenter,
-                fixedHeight = 40,
-                fixedWidth = 80,
-                margin = new RectOffset(5, 7, 0, 5),
-            };
-
+            GUIStyle guistyle = XmUIStyle.ButtonStyle;
             return GUI.Button(position, text, guistyle);
         }
         public static bool Button(string text, bool stat)
@@ -149,88 +79,61 @@ namespace ScriptTrainer
         }
         public static bool Button(string text, Texture2D normal, Texture2D active)
         {
-            GUIStyle guistyle = new GUIStyle()
-            {
-                normal = new GUIStyleState  // 正常样式
-                {
-                    textColor = Color.white,
-                    background = normal
-                },
-                active = new GUIStyleState  // 点击样式
-                {
-                    textColor = Color.white,
-                    background = active
-                },
-                wordWrap = true,
-                alignment = TextAnchor.MiddleCenter,
-                fixedHeight = 40,
-                fixedWidth = 80,
-                margin = new RectOffset(5, 7, 0, 5),
-            };
+            GUIStyle guistyle = XmUIStyle.ButtonStyle;
+            guistyle.normal.background = normal;
+            guistyle.active.background = active;
+
             return GUILayout.Button(text, guistyle);
+        }
+        public static bool Button(Texture2D img)
+        {
+            GUIStyle guistyle = XmUIStyle.ButtonStyle;
+            guistyle.normal.background = img;
+            guistyle.fixedWidth = 50;
+            guistyle.fixedHeight = 50;
+            //float num = EditorGUILayout.FloatField(new GUIContent("float number", comment1), 5.0f);
+            return GUILayout.Button("", guistyle);
         }
         public static bool Button(string text, Texture2D img)
         {
-            GUIStyle guistyle = new GUIStyle()
-            {
-                normal = new GUIStyleState  // 正常样式
-                {
-                    textColor = Color.white,
-                    background = img
-                },
-                wordWrap = true,
-                alignment = TextAnchor.MiddleCenter,
-                fixedWidth = 70,
-                fixedHeight = 82,
-                margin = new RectOffset(5, 7, 0, 5),
-            };
-
-            return GUILayout.Button(text, guistyle);
+            GUIStyle guistyle = XmUIStyle.ButtonStyle;
+            guistyle.normal.background = img;
+            guistyle.fixedWidth = 50;
+            guistyle.fixedHeight = 50;
+            //float num = EditorGUILayout.FloatField(new GUIContent("float number", comment1), 5.0f);
+            Label(text, 65, 40);
+            return GUILayout.Button("", guistyle);
         }
 
         public static void Label(string text)
         {
-            GUIStyle guistyle = new GUIStyle()
-            {
-                fixedWidth = 50,
-                fixedHeight = 40,
-                alignment = TextAnchor.MiddleRight,
-                normal = new GUIStyleState
-                {
-                    textColor = Color.white
-                }
-            };
+            GUIStyle guistyle = XmUIStyle.LabelStyle;
             GUILayout.Label(text, guistyle);
         }
 
         public static void Label(string text, RectOffset margin)
         {
-            GUIStyle guistyle = new GUIStyle()
-            {
-                fixedWidth = 50,
-                fixedHeight = 40,
-                alignment = TextAnchor.MiddleRight,
-                normal = new GUIStyleState
-                {
-                    textColor = Color.white
-                },
-                margin = margin
-            };
+            GUIStyle guistyle = XmUIStyle.LabelStyle;
+            guistyle.margin = margin;
+
             GUILayout.Label(text, guistyle);
         }
 
         public static void Label(string text, int width, int height)
         {
-            GUIStyle guistyle = new GUIStyle()
-            {
-                fixedWidth = width,
-                fixedHeight = height,
-                alignment = TextAnchor.MiddleRight,
-                normal = new GUIStyleState
-                {
-                    textColor = Color.white
-                }
-            };
+            GUIStyle guistyle = XmUIStyle.LabelStyle;
+            guistyle.fixedWidth = width;
+            guistyle.fixedHeight = height;
+            //GUIStyle guistyle = new GUIStyle()
+            //{
+            //    fixedWidth = width,
+            //    fixedHeight = height,
+            //    alignment = TextAnchor.MiddleRight,
+            //    normal = new GUIStyleState
+            //    {
+            //        textColor = Color.white
+            //    }
+            //};
             GUILayout.Label(text, guistyle);
         }
 
@@ -265,14 +168,14 @@ namespace ScriptTrainer
             return GUILayout.TextField(text, guistyle);
         }
 
-       /// <summary>
-       /// 分页栏
-       /// </summary>
-       /// <param name="page">当前页数</param>
-       /// <param name="count">总数量</param>
-       /// <param name="limit">每页数量</param>
-       /// <param name="PaginationDo">点击执行函数</param>
-        public static void PaginationList(int page, int count,int limit, PaginationDo PaginationDo)
+        /// <summary>
+        /// 分页栏
+        /// </summary>
+        /// <param name="page">当前页数</param>
+        /// <param name="count">总数量</param>
+        /// <param name="limit">每页数量</param>
+        /// <param name="PaginationDo">点击执行函数</param>
+        public static void PaginationList(int page, int count, int limit, PaginationDo PaginationDo)
         {
             GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.MiddleCenter });
             {
@@ -328,7 +231,7 @@ namespace ScriptTrainer
                         texture2D2.SetPixel(0, 0, new Color32(51, 122, 183, 255));
                     }
                     else
-                    {                       
+                    {
                         texture2D2.SetPixel(0, 0, new Color32(59, 59, 59, 255));
                     }
                     texture2D2.Apply();

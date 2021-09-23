@@ -10,7 +10,7 @@ namespace ScriptTrainer
     [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", Description, Version)]
     public class ScriptTrainer : BaseUnityPlugin
     {
-        public const string Version = "1.2.1";
+        public const string Version = "1.3.0";
 
         public const string Description = "【觅长生】内置修改器";
 
@@ -124,6 +124,8 @@ namespace ScriptTrainer
                     // 定义一个新窗口
                     int winId = 20210630;
                     windowRect = GUI.Window(winId, windowRect, DoMyWindow, "", myWindowStyle);
+
+                    new UI.XmUIStyle(); // 修正样式
 
                     float windowW = 210f;
                     window.LeftWindow(new Rect(windowRect.x - windowW, windowRect.y, windowW, windowRect.height));      // 左侧菜单
@@ -239,7 +241,7 @@ namespace ScriptTrainer
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false, GUILayout.Width(700), GUILayout.Height(300));
                 {
                     // KBEngine.Avatar player = Tools.instance.getPlayer();    // 获取玩家                  
-
+                    
                     XmGUI.Title("常用功能");
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
@@ -286,6 +288,7 @@ namespace ScriptTrainer
                     }
                     XmGUI.hr();
                     {
+                        new UI.XmUIStyle(); // 修正样式
                         if (XmGUI.Button("修为全满"))
                         {
                             player.exp = (ulong)jsonData.instance.LevelUpDataJsonData[player.level.ToString()]["MaxExp"].I;
