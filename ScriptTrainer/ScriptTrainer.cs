@@ -10,7 +10,7 @@ namespace ScriptTrainer
     [BepInPlugin("aoe.top.MiChangSheng.ScriptTrainer", Description, Version)]
     public class ScriptTrainer : BaseUnityPlugin
     {
-        public const string Version = "1.3.0";
+        public const string Version = "1.4.0";
 
         public const string Description = "【觅长生】内置修改器";
 
