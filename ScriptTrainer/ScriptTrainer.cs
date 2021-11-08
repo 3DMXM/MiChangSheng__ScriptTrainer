@@ -719,6 +719,7 @@ namespace ScriptTrainer
                             if (XmGUI.Button("设为道侣", width: 75, height: 20) && !daolvId.HasItem(npc.ID))
                             {
                                 daolvId.Add(npc.ID);
+                                NPCEx.AddEvent(npc.ID, player.worldTimeMag.getNowTime().ToString("d"), String.Format("和{0}结为道侣。", player.name));
                             }
                         }
                     }
