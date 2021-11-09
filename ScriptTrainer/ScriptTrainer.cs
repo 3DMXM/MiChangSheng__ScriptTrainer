@@ -648,6 +648,11 @@ namespace ScriptTrainer
                     GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.UpperLeft });
                     {
                         {
+                            XmGUI.Label("ID");
+                            string ItemText = XmGUI.TextField(npc.ID.ToString());
+                            //npc.ID = ItemText;
+                        }
+                        {
                             XmGUI.Label("名称");
                             string ItemText = XmGUI.TextField(npc.Name);
                             //npc.Name = ItemText;
@@ -668,8 +673,8 @@ namespace ScriptTrainer
                             npc.HP = Script.CheckIsInt(ItemText);
                         }
                         {
-                            XmGUI.Label("资质")
-; string ItemText = XmGUI.TextField(npc.ZiZhi.ToString());
+                            XmGUI.Label("资质");
+                            string ItemText = XmGUI.TextField(npc.ZiZhi.ToString());
                             npc.ZiZhi = Script.CheckIsInt(ItemText);
                         }
                         {
@@ -703,6 +708,19 @@ namespace ScriptTrainer
                         {
                             XmGUI.Label("修为");
                             window.NPCExp(npc);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                    XmGUI.Title("关系");
+                    GUILayout.BeginHorizontal(new GUIStyle { alignment = TextAnchor.MiddleCenter });
+                    {
+                        {
+                            JSONObject daolvId = player.DaoLvId;
+                            if (XmGUI.Button("设为道侣", width: 75, height: 20) && !daolvId.HasItem(npc.ID))
+                            {
+                                daolvId.Add(npc.ID);
+                                NPCEx.AddEvent(npc.ID, player.worldTimeMag.getNowTime().ToString("d"), String.Format("和{0}结为道侣。", player.name));
+                            }
                         }
                     }
                     GUILayout.EndHorizontal();
